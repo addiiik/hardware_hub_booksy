@@ -1,11 +1,10 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import LoadingOverlay from "@/components/loading-overlay";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
-  if (loading) return <LoadingOverlay />;
+  if (loading) return null;
 
   if (!user) return <Navigate to="/" replace />;
 
