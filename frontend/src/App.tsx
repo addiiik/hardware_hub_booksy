@@ -1,36 +1,39 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Toaster } from "@/components/ui/sonner";
-
-import LoginPage from "./pages/LoginPage";
-import DashboardPage from "./pages/DashboardPage";
-import { AuthProvider } from "./auth/AuthContext";
-import ProtectedRoute from "./routes/ProtectedRoute";
-import GuestRoute from "./routes/GuestRoute";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import LoginPage from "@/pages/LoginPage"
+import DashboardLayout from "@/layouts/DashboardLayout"
+import HardwareListPage from "@/pages/HardwareListPage"
+import MyRentalsPage from "@/pages/MyRentalsPage"
+import AdminHardwarePage from "@/pages/AdminHardwarePage"
+import AdminAccountsPage from "@/pages/AdminAccountsPage"
+import ProtectedRoute from "@/routes/ProtectedRoute"
+import GuestRoute from "@/routes/GuestRoute"
+import { AuthProvider } from "./auth/AuthContext"
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Toaster position="bottom-right" />
         <Routes>
-          <Route
-            path="/"
-            element={
-              <GuestRoute>
-                <LoginPage />
-              </GuestRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route element={<GuestRoute />}>
+            <Route path="/signin" element={<LoginPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute />}>
+            <Route element={<DashboardLayout />}>
+              <Route path="/" element={<Navigate to="/hardware" replace />} />
+              <Route path="/hardware" element={<HardwareListPage />} />
+              <Route path="/rentals" element={<MyRentalsPage />} />
+
+              <Route element={<ProtectedRoute adminOnly />}>
+                <Route path="/admin/hardware" element={<AdminHardwarePage />} />
+                <Route path="/admin/accounts" element={<AdminAccountsPage />} />
+              </Route>
+            </Route>
+          </Route>
+
+          <Route path="*" element={<Navigate to="/hardware" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-  );
+  )
 }

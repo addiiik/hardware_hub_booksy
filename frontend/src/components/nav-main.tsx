@@ -1,3 +1,4 @@
+import { Link, useLocation } from "react-router-dom"
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -15,9 +16,10 @@ export function NavMain({
     title: string
     url: string
     icon?: React.ReactNode
-    isActive?: boolean
   }[]
 }) {
+  const location = useLocation()
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
@@ -26,8 +28,8 @@ export function NavMain({
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton 
               tooltip={item.title} 
-              isActive={item.isActive}
-              render={<a href={item.url} />}
+              isActive={location.pathname === item.url}
+              render={<Link to={item.url} />}
             >
               {item.icon}
               <span>{item.title}</span>

@@ -1,12 +1,22 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
+type ProtectedRouteProps = {
+  adminOnly?: boolean;
+};
+
+export default function ProtectedRoute({ adminOnly = false }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
 
   if (loading) return null;
 
-  if (!user) return <Navigate to="/" replace />;
+  if (!user) {
+    return <Navigate to="/signin" replace />;
+  }
 
-  return <>{children}</>;
+  if (adminOnly && user.role !== "admin") {
+    return <Navigate to="/hardware" replace />;
+  }
+
+  return <Outlet />;
 }

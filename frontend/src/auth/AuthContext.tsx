@@ -23,11 +23,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function checkAuth() {
+  async function checkAuth(signal?: AbortSignal) {
     setLoading(true);
     try {
       const res = await fetch("http://localhost:8000/api/auth/me", {
         credentials: "include",
+        signal,
       });
 
       if (!res.ok) {
@@ -40,9 +41,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       setUser(data);
     } catch (error: any) {
+      if (error.name === "AbortError") return;
       toast.error(error.message || "Failed to load user session.");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }
 
@@ -68,7 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    checkAuth();
+    const controller = new AbortController();
+    checkAuth(controller.signal);
+    return () => controller.abort();
   }, []);
 
   return (
