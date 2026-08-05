@@ -8,11 +8,14 @@ import AdminAccountsPage from "@/pages/AdminAccountsPage"
 import ProtectedRoute from "@/routes/ProtectedRoute"
 import GuestRoute from "@/routes/GuestRoute"
 import { AuthProvider } from "./auth/AuthContext"
+import { Toaster } from "sonner"
+import AdminRepairsPage from "./pages/AdminRepairsPage"
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+      <Toaster position="bottom-right" />
         <Routes>
           <Route element={<GuestRoute />}>
             <Route path="/signin" element={<LoginPage />} />
@@ -27,6 +30,7 @@ export default function App() {
               <Route element={<ProtectedRoute adminOnly />}>
                 <Route path="/admin/hardware" element={<AdminHardwarePage />} />
                 <Route path="/admin/accounts" element={<AdminAccountsPage />} />
+                <Route path="/admin/repairs" element={<AdminRepairsPage />} />
               </Route>
             </Route>
           </Route>

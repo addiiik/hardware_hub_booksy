@@ -60,7 +60,7 @@ export function NavUser({
             sideOffset={4}
           >
             <DropdownMenuItem 
-              className="text-destructive focus:text-destructive cursor-pointer"
+              className="text-destructive focus:text-destructive"
               onClick={logout}
             >
               <LogOutIcon className="mr-2 size-4" />

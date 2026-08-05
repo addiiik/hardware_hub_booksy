@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton
 } from "@/components/ui/sidebar"
-import { LaptopIcon, ClipboardListIcon, WrenchIcon, UsersIcon } from "lucide-react"
+import { LaptopIcon, ClipboardListIcon, WrenchIcon, UsersIcon, HardDrive } from "lucide-react"
 import { useAuth } from "@/auth/AuthContext"
 
 const platformLinks = [
@@ -22,12 +22,10 @@ const platformLinks = [
 ]
 
 const adminLinks = [
-  { title: "Hardware", url: "/admin/hardware", icon: <WrenchIcon /> },
+  { title: "Hardware", url: "/admin/hardware", icon: <HardDrive /> },
   { title: "Users", url: "/admin/accounts", icon: <UsersIcon /> },
+  { title: "Repairs", url: "/admin/repairs", icon: <WrenchIcon /> },
 ]
-
-const capitalize = (str: string) =>
-  str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
@@ -43,8 +41,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">Hardware Hub</span>
-                <span className="truncate text-xs">
-                  {capitalize(user?.role ?? "Internal")}
+                <span className="truncate text-xs capitalize">
+                  {user?.role ?? "Internal"}
                 </span>
               </div>
             </SidebarMenuButton>

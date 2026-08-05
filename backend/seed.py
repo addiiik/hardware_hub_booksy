@@ -7,18 +7,18 @@ SEED_ITEMS = [
     { "id": 2, "name": "Apple MacBook Pro 13", "brand": "Apple", "serialNumber": "MBP-2021-002", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2021-12-20", "status": models.StatusEnum.IN_USE },
     { "id": 3, "name": "Razer Basilisk V2", "brand": "Razer", "serialNumber": "RZ-BAS-003", "category": models.CategoryEnum.PERIPHERAL, "purchaseDate": "2021-06-05", "status": models.StatusEnum.IN_REPAIR },
     { "id": 4, "name": "Samsung Galaxy S21", "brand": "Samsung", "serialNumber": "SAM-S21-004", "category": models.CategoryEnum.SMARTPHONE, "purchaseDate": "2021-11-23", "status": models.StatusEnum.AVAILABLE },
-    { "id": 5, "name": "Dell XPS 15 9510", "brand": "Dell", "serialNumber": "DELL-XPS-005", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2022-03-15", "status": models.StatusEnum.AVAILABLE, "notes": "Battery swelling, do not issue without service." },
+    { "id": 5, "name": "Dell XPS 15 9510", "brand": "Dell", "serialNumber": "DELL-XPS-005", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2022-03-15", "status": models.StatusEnum.AVAILABLE, "note": "Battery swelling, do not issue without service." },
     { "id": 6, "name": "Logitech MX Master 3", "brand": "Logitech", "serialNumber": "LOG-MX3-006", "category": models.CategoryEnum.PERIPHERAL, "purchaseDate": "2022-10-10", "status": models.StatusEnum.AVAILABLE },
     { "id": 7, "name": "Sony WH-1000XM4", "brand": "Sony", "serialNumber": "SNY-XM4-007", "category": models.CategoryEnum.AUDIO, "purchaseDate": "2022-01-12", "status": models.StatusEnum.IN_USE },
-    { "id": 8, "name": "Duplicate ID Test Laptop", "brand": "Lenovo", "serialNumber": "LNV-TST-008", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2023-01-01", "status": models.StatusEnum.IN_REPAIR },
+    { "id": 8, "name": "Duplicate ID Test Laptop", "brand": "Lenovo", "serialNumber": "LNV-TST-008", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2023-01-01", "status": models.StatusEnum.IN_REPAIR, "rentable": False },
     { "id": 9, "name": "iPad Pro 12.9", "brand": "Apple", "serialNumber": "IPD-PRO-009", "category": models.CategoryEnum.TABLET, "purchaseDate": "2023-05-22", "status": models.StatusEnum.AVAILABLE },
-    { "id": 10, "name": "Unknown Device", "brand": None, "serialNumber": "UNK-DEV-010", "category": models.CategoryEnum.OTHER, "purchaseDate": None, "status": models.StatusEnum.AVAILABLE },
-    { "id": 11, "name": "MacBook Air M2", "brand": "Apple", "serialNumber": "MBA-M2-011", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2023-08-01", "status": models.StatusEnum.AVAILABLE, "history": "Returned by user with liquid damage. Keyboard sticky." },
+    { "id": 10, "name": "Anker 737 Power Bank", "brand": "Anker", "serialNumber": "ANK-PB-010", "category": models.CategoryEnum.ACCESSORY, "purchaseDate": "2023-03-10", "status": models.StatusEnum.AVAILABLE },
+    { "id": 11, "name": "MacBook Air M2", "brand": "Apple", "serialNumber": "MBA-M2-011", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2023-08-01", "status": models.StatusEnum.AVAILABLE, "note": "Returned by user with liquid damage. Keyboard sticky." },
     { "id": 12, "name": "MacBook Pro 16\"", "brand": "Apple", "serialNumber": "MBP-2024-012", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2024-01-10", "status": models.StatusEnum.AVAILABLE },
     { "id": 13, "name": "Dell UltraSharp 27 Monitor", "brand": "Dell", "serialNumber": "DELL-MON-013", "category": models.CategoryEnum.MONITOR, "purchaseDate": "2023-02-14", "status": models.StatusEnum.AVAILABLE },
     { "id": 14, "name": "ThinkPad X1 Carbon Gen 10", "brand": "Lenovo", "serialNumber": "TPX1-014", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2023-04-11", "status": models.StatusEnum.IN_USE },
     { "id": 15, "name": "iPhone 15 Pro", "brand": "Apple", "serialNumber": "IPH-15P-015", "category": models.CategoryEnum.SMARTPHONE, "purchaseDate": "2024-02-01", "status": models.StatusEnum.AVAILABLE },
-    { "id": 16, "name": "iPad Air M1", "brand": "Apple", "serialNumber": "IPAD-AIR-016", "category": models.CategoryEnum.TABLET, "purchaseDate": "2023-09-12", "status": models.StatusEnum.IN_REPAIR, "notes": "Cracked screen near home button." },
+    { "id": 16, "name": "iPad Air M1", "brand": "Apple", "serialNumber": "IPAD-AIR-016", "category": models.CategoryEnum.TABLET, "purchaseDate": "2023-09-12", "status": models.StatusEnum.IN_REPAIR, "note": "Cracked screen near home button." },
     { "id": 17, "name": "Microsoft Surface Pro 9", "brand": "Microsoft", "serialNumber": "SRF-PRO-017", "category": models.CategoryEnum.TABLET, "purchaseDate": "2023-11-05", "status": models.StatusEnum.IN_USE },
     { "id": 18, "name": "Apple Magic Keyboard", "brand": "Apple", "serialNumber": "MKB-018", "category": models.CategoryEnum.PERIPHERAL, "purchaseDate": "2023-06-18", "status": models.StatusEnum.AVAILABLE },
     { "id": 19, "name": "LG UltraFine 4K Display", "brand": "LG", "serialNumber": "LG-UF4K-019", "category": models.CategoryEnum.MONITOR, "purchaseDate": "2022-08-20", "status": models.StatusEnum.AVAILABLE },
@@ -26,7 +26,7 @@ SEED_ITEMS = [
     { "id": 21, "name": "Asus ROG Zephyrus G14", "brand": "Asus", "serialNumber": "ASU-ROG-021", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2023-07-22", "status": models.StatusEnum.IN_USE },
     { "id": 22, "name": "Keychron K2 Wireless Keyboard", "brand": "Keychron", "serialNumber": "KCH-K2-022", "category": models.CategoryEnum.PERIPHERAL, "purchaseDate": "2023-03-30", "status": models.StatusEnum.AVAILABLE },
     { "id": 23, "name": "Bose QuietComfort 45", "brand": "Bose", "serialNumber": "BOS-QC45-023", "category": models.CategoryEnum.AUDIO, "purchaseDate": "2022-12-01", "status": models.StatusEnum.AVAILABLE },
-    { "id": 24, "name": "HP ZBook Studio G9", "brand": "HP", "serialNumber": "HP-ZBK-024", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2023-10-14", "status": models.StatusEnum.IN_REPAIR, "notes": "Thermal throttling issue under load." },
+    { "id": 24, "name": "HP ZBook Studio G9", "brand": "HP", "serialNumber": "HP-ZBK-024", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2023-10-14", "status": models.StatusEnum.IN_REPAIR, "note": "Thermal throttling issue under load." },
     { "id": 25, "name": "Samsung Galaxy Tab S9", "brand": "Samsung", "serialNumber": "SAM-TS9-025", "category": models.CategoryEnum.TABLET, "purchaseDate": "2024-03-01", "status": models.StatusEnum.AVAILABLE },
     { "id": 26, "name": "Logitech C920 HD Pro Webcam", "brand": "Logitech", "serialNumber": "LOG-C920-026", "category": models.CategoryEnum.PERIPHERAL, "purchaseDate": "2021-09-15", "status": models.StatusEnum.AVAILABLE },
     { "id": 27, "name": "Apple Mac Mini M2", "brand": "Apple", "serialNumber": "MM-M2-027", "category": models.CategoryEnum.OTHER, "purchaseDate": "2023-05-10", "status": models.StatusEnum.IN_USE },
@@ -40,7 +40,7 @@ SEED_ITEMS = [
     { "id": 35, "name": "Mac Studio M2 Max", "brand": "Apple", "serialNumber": "MS-M2M-035", "category": models.CategoryEnum.OTHER, "purchaseDate": "2023-11-20", "status": models.StatusEnum.IN_USE },
     { "id": 36, "name": "BenQ ScreenBar Halo", "brand": "BenQ", "serialNumber": "BNQ-SB-036", "category": models.CategoryEnum.ACCESSORY, "purchaseDate": "2023-06-01", "status": models.StatusEnum.AVAILABLE },
     { "id": 37, "name": "CalDigit TS4 Thunderbolt Dock", "brand": "CalDigit", "serialNumber": "CD-TS4-037", "category": models.CategoryEnum.ACCESSORY, "purchaseDate": "2023-09-09", "status": models.StatusEnum.IN_USE },
-    { "id": 38, "name": "Google Pixel Fold", "brand": "Google", "serialNumber": "GGL-FLD-038", "category": models.CategoryEnum.SMARTPHONE, "purchaseDate": "2024-02-18", "status": models.StatusEnum.IN_REPAIR, "notes": "Hinge resistance issue." },
+    { "id": 38, "name": "Google Pixel Fold", "brand": "Google", "serialNumber": "GGL-FLD-038", "category": models.CategoryEnum.SMARTPHONE, "purchaseDate": "2024-02-18", "status": models.StatusEnum.IN_REPAIR, "note": "Hinge resistance issue." },
     { "id": 39, "name": "HP EliteBook 840 G9", "brand": "HP", "serialNumber": "HP-ELT-039", "category": models.CategoryEnum.LAPTOP, "purchaseDate": "2023-02-11", "status": models.StatusEnum.AVAILABLE },
     { "id": 40, "name": "Logitech StreamCam", "brand": "Logitech", "serialNumber": "LOG-SC-040", "category": models.CategoryEnum.PERIPHERAL, "purchaseDate": "2022-07-07", "status": models.StatusEnum.AVAILABLE },
     { "id": 41, "name": "Sennheiser Momentum 4", "brand": "Sennheiser", "serialNumber": "SNN-M4-041", "category": models.CategoryEnum.AUDIO, "purchaseDate": "2023-10-30", "status": models.StatusEnum.AVAILABLE },
@@ -97,13 +97,34 @@ def seed_database():
             category=item_data["category"],
             purchase_date=item_data.get("purchaseDate"),
             status=item_data["status"],
-            notes=item_data.get("notes"),
-            history=item_data.get("history")
+            rentable=item_data.get("rentable", True)
         )
         db.add(item)
+        db.flush()
+
+        if item_data.get("note"):
+            note = models.Note(
+                item_id=item.id,
+                author_id=admin_user.id,
+                content=item_data["note"]
+            )
+            db.add(note)
+
+        if item_data["status"] == models.StatusEnum.IN_USE:
+            rental = models.Rental(
+                user_id=john_doe.id,
+                item_id=item.id
+            )
+            db.add(rental)
+
+        elif item_data["status"] == models.StatusEnum.IN_REPAIR:
+            repair = models.Repair(
+                item_id=item.id
+            )
+            db.add(repair)
 
     db.commit()
-    print("DB seeded successfully")
+    print("DB seeded successfully.")
     db.close()
 
 if __name__ == "__main__":

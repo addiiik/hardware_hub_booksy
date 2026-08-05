@@ -21,6 +21,14 @@ class StatusEnum(str, enum.Enum):
     IN_USE = "In Use"
     IN_REPAIR = "In Repair"
 
+class RentalTypeEnum(str, enum.Enum):
+    REGULAR = "Regular"
+    MAINTENANCE = "Maintenance"
+
+class RoleEnum(str, enum.Enum):
+    EMPLOYEE = "employee"
+    ADMIN = "admin"
+
 class User(Base):
     __tablename__ = "users"
 
@@ -29,11 +37,13 @@ class User(Base):
     last_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
-    role = Column(String, default="employee")
+    role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.EMPLOYEE)
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     rentals = relationship("Rental", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
+    notes = relationship("Note", back_populates="author")
 
 
 class HardwareItem(Base):
@@ -46,13 +56,28 @@ class HardwareItem(Base):
     
     category = Column(Enum(CategoryEnum), nullable=False, default=CategoryEnum.PERIPHERAL)
     status = Column(Enum(StatusEnum), nullable=False, default=StatusEnum.AVAILABLE)
-    
     purchase_date = Column(String, nullable=True)
-    notes = Column(Text, nullable=True)
-    history = Column(Text, nullable=True)
+    
+    rentable = Column(Boolean, default=True, nullable=False)
+    
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
-    rentals = relationship("Rental", back_populates="item")
+    rentals = relationship("Rental", back_populates="item", cascade="all, delete-orphan")
+    notes = relationship("Note", back_populates="item", cascade="all, delete-orphan")
+    repairs = relationship("Repair", back_populates="item", cascade="all, delete-orphan")
+
+
+class Note(Base):
+    __tablename__ = "notes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    item_id = Column(Integer, ForeignKey("hardware_items.id"), nullable=False)
+    author_id = Column(String, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    item = relationship("HardwareItem", back_populates="notes")
+    author = relationship("User", back_populates="notes")
 
 
 class Rental(Base):
@@ -62,10 +87,20 @@ class Rental(Base):
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     item_id = Column(Integer, ForeignKey("hardware_items.id"), nullable=False)
     rented_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    returned_at = Column(DateTime, nullable=True)
+    returned_at = Column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User", back_populates="rentals")
     item = relationship("HardwareItem", back_populates="rentals")
+
+class Repair(Base):
+    __tablename__ = "repairs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    item_id = Column(Integer, ForeignKey("hardware_items.id"), nullable=False)
+    repair_start_date = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    repair_end_date = Column(DateTime(timezone=True), nullable=True)
+
+    item = relationship("HardwareItem", back_populates="repairs")
 
 
 class Notification(Base):
