@@ -34,3 +34,9 @@ export const hardwareCreationSchema = z.object({
 })
 
 export type HardwareCreationValues = z.infer<typeof hardwareCreationSchema>
+
+export const noteCreationSchema = z.object({
+  content: z.string().min(1, "Note content cannot be empty"),
+})
+
+export type NoteCreationValues = z.infer<typeof noteCreationSchema>

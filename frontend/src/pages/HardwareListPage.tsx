@@ -9,25 +9,59 @@ import { getHardwareColumns } from "@/components/columns/hardware-columns"
 
 export default function HardwareListPage() {
   const [data, setData] = useState<HardwareItem[]>([])
+  const [aiData, setAiData] = useState<HardwareItem[] | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAiMode, setIsAiMode] = useState(false)
 
   async function fetchHardware() {
+    setLoading(true)
     try {
       const response = await fetch("http://localhost:8000/api/hardware", {
         credentials: "include",
       })
+      if (!response.ok) throw new Error("Failed to fetch hardware data")
+      
+      const freshData: HardwareItem[] = await response.json()
+      setData(freshData)
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch hardware data")
-      }
+      setAiData((prevAiData) => {
+        if (!prevAiData) return null
+        return prevAiData.map((aiItem) => {
+          const matchingFreshItem = freshData.find((item) => item.id === aiItem.id)
+          return matchingFreshItem ? { ...aiItem, ...matchingFreshItem } : aiItem
+        })
+      })
 
-      const result = await response.json()
-      setData(result)
     } catch (error: any) {
-      toast.error(error.message || "Something went wrong fetching data.")
+      toast.error(error.message)
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleAiSearch(query: string) {
+    if (!query.trim()) {
+       setAiData(null)
+       return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch(`http://localhost:8000/api/hardware/ai-search?query=${encodeURIComponent(query)}`, {
+        credentials: "include",
+      })
+      if (!response.ok) throw new Error("AI search failed")
+      setAiData(await response.json())
+      toast.success("AI found the best matches!")
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const toggleAiMode = (enabled: boolean) => {
+    setIsAiMode(enabled)
   }
 
   useEffect(() => {
@@ -45,7 +79,15 @@ export default function HardwareListPage() {
       {loading ? (
         <LoadingOverlay transparent/>
       ) : (
-        <DataTable columns={columns} data={data} initialSorting={[{ id: "status", desc: false }]} />
+        <DataTable 
+          columns={columns} 
+          data={isAiMode && aiData ? aiData : data} 
+          initialSorting={[{ id: "status", desc: false }]} 
+          enableAiSearch={true}
+          isAiMode={isAiMode}
+          onAiToggle={toggleAiMode}
+          onAiSearchSubmit={handleAiSearch}
+        />
       )}
     </div>
   )

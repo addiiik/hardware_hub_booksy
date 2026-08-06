@@ -1,7 +1,7 @@
 import uuid
 import enum
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Enum
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Enum, JSON
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -59,6 +59,8 @@ class HardwareItem(Base):
     purchase_date = Column(String, nullable=True)
     
     rentable = Column(Boolean, default=True, nullable=False)
+
+    embedding = Column(JSON, nullable=True)
     
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 

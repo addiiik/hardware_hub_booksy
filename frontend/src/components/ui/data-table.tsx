@@ -32,25 +32,35 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Sparkles } from "lucide-react"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  initialSorting?: SortingState,
+  initialSorting?: SortingState
   actionButton?: React.ReactNode
+  
+  enableAiSearch?: boolean
+  isAiMode?: boolean
+  onAiToggle?: (enabled: boolean) => void
+  onAiSearchSubmit?: (query: string) => void
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   initialSorting = [],
-  actionButton
+  actionButton,
+  enableAiSearch = false,
+  isAiMode = false,
+  onAiToggle,
+  onAiSearchSubmit
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>(initialSorting)
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = React.useState("")
+  const [aiSearchText, setAiSearchText] = React.useState("")
 
   const table = useReactTable({
     data,
@@ -67,19 +77,45 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
       columnVisibility,
-      globalFilter,
+      globalFilter: isAiMode ? "" : globalFilter,
     },
   })
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder="Search all items..."
-          value={globalFilter ?? ""}
-          onChange={(event) => setGlobalFilter(event.target.value)}
-          className="max-w-sm"
-        />
+      <div className="flex items-center justify-between"> 
+        <div className="flex items-center gap-2 max-w-sm w-full">
+          <Input
+            placeholder={isAiMode ? "Ask AI to find gear..." : "Search all items..."}
+            value={isAiMode ? aiSearchText : (globalFilter ?? "")}
+            onChange={(event) => {
+              if (isAiMode) {
+                setAiSearchText(event.target.value)
+              } else {
+                setGlobalFilter(event.target.value)
+              }
+            }}
+            onKeyDown={(e) => {
+              if (isAiMode && e.key === 'Enter' && onAiSearchSubmit) {
+                onAiSearchSubmit(aiSearchText)
+              }
+            }}
+            className={`flex-1 transition-all ${isAiMode ? 'border-purple-500 focus-visible:ring-purple-500 bg-purple-500/5' : ''}`}
+          />
+          {enableAiSearch && (
+            <Button 
+              variant={isAiMode ? "default" : "outline"} 
+              onClick={() => {
+                onAiToggle?.(!isAiMode)
+              }}
+              className={isAiMode ? "bg-purple-600 hover:bg-purple-700" : ""}
+              title="Toggle AI Semantic Search"
+            >
+              <Sparkles className="h-4 w-4" />
+              AI MODE
+            </Button>
+          )}
+        </div>
         <div className="flex items-center gap-4 ml-auto">            
             <DropdownMenu>
               <DropdownMenuTrigger

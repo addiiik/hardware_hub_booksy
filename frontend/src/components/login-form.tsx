@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-import { useAuth } from "@/auth/AuthContext"
+import { useAuth } from "@/context/AuthContext"
 import {
   loginSchema,
   type LoginFormValues,

@@ -7,7 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, RotateCcw } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, RotateCcw } from "lucide-react"
 import { ColumnDef } from "@tanstack/react-table"
 import { RentedItem } from "@/types/rentals"
 import { toast } from "sonner"
@@ -19,7 +19,12 @@ export const getRentalsColumns = (onItemReturned: () => void): ColumnDef<RentedI
   { accessorKey: "item.category", header: "Category" },
   {
     accessorKey: "rented_at",
-    header: "Rented At",
+    header: ({ column }) => (
+      <Button variant="ghost" className="-ml-3 h-8" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        Rented At
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => {
       return new Date(row.getValue("rented_at")).toLocaleDateString()
     }

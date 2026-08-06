@@ -1,13 +1,15 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException, status, Response, Cookie
+from fastapi import BackgroundTasks, FastAPI, Depends, HTTPException, status, Response, Cookie
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List
 from datetime import datetime, timezone
+import threading
 
+import ai_utils
 import models
 import schemas
-from database import get_db
+from database import SessionLocal, get_db
 from seed import seed_database
 from auth import (
     verify_password,
@@ -15,9 +17,56 @@ from auth import (
     decode_access_token
 )
 
+def startup_index_unindexed_items():
+    """Runs on server startup in a background thread to index missing items."""
+    db = SessionLocal()
+    try:
+        unindexed_items = db.query(models.HardwareItem).filter(models.HardwareItem.embedding.is_(None)).all()
+        
+        if not unindexed_items:
+            return 
+
+        admins = db.query(models.User).filter(models.User.role == models.RoleEnum.ADMIN).all()
+
+        for item in unindexed_items:
+            for admin in admins:
+                start_notif = models.Notification(
+                    user_id=admin.id,
+                    message=f"AI Search: Started indexing {item.name}"
+                )
+                db.add(start_notif)
+            db.commit()
+
+            try:
+                description = ai_utils.generate_hardware_description(item)
+                embedding_vector = ai_utils.get_embedding(description)
+
+                if embedding_vector:
+                    item.embedding = embedding_vector
+                    final_msg = f"AI Search: Successfully indexed {item.name}."
+                else:
+                    final_msg = f"AI Search: Failed to index {item.name} (Empty response)."
+            except Exception as e:
+                final_msg = f"AI Search Error: Could not index {item.name}. {str(e)}"
+
+            for admin in admins:
+                end_notif = models.Notification(
+                    user_id=admin.id,
+                    message=final_msg
+                )
+                db.add(end_notif)
+            
+            db.commit()
+
+    except Exception as e:
+        print(f"Startup background indexing failed: {e}")
+    finally:
+        db.close()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     seed_database()
+    threading.Thread(target=startup_index_unindexed_items, daemon=True).start()
     yield
 
 app = FastAPI(title="Booksy Hardware Hub", lifespan=lifespan)
@@ -124,7 +173,7 @@ def logout(response: Response):
 
 @app.get(
     "/api/hardware",
-    response_model=List[schemas.HardwareItemResponse]
+    response_model=List[schemas.HardwareItemBasicResponse]
 )
 def get_hardware_items(
     db: Session = Depends(get_db),
@@ -170,18 +219,30 @@ def get_my_rentals(
     )
     return rentals
 
-@app.get(
-    "/api/admin/repairs",
-    response_model=List[schemas.RepairResponse]
+@app.post(
+    "/api/hardware/{hardware_id}/notes",
+    response_model=schemas.NoteResponse,
+    status_code=status.HTTP_201_CREATED
 )
-def get_admin_repairs(
+def add_note_to_hardware(
+    hardware_id: int,
+    request: schemas.NoteCreateRequest,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-        
-    return db.query(models.Repair).filter(models.Repair.repair_end_date.is_(None)).all()
+    item = db.query(models.HardwareItem).filter(models.HardwareItem.id == hardware_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Hardware item not found")
+
+    new_note = models.Note(
+        item_id=hardware_id,
+        author_id=current_user.id,
+        content=request.content
+    )
+    db.add(new_note)
+    db.commit()
+    db.refresh(new_note)
+    return new_note
 
 @app.post(
     "/api/admin/hardware/{hardware_id}/toggle-repair",
@@ -371,6 +432,7 @@ def delete_user(
 )
 def create_hardware_item(
     request: schemas.HardwareCreateRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
@@ -404,6 +466,8 @@ def create_hardware_item(
     db.commit()
     db.refresh(new_item)
 
+    background_tasks.add_task(background_index_item, new_item.id, current_user.id)
+
     return new_item
 
 @app.delete("/api/admin/hardware/{hardware_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -422,3 +486,163 @@ def delete_hardware(
     db.delete(item)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@app.post(
+    "/api/admin/hardware/{hardware_id}/index-ai",
+    response_model=schemas.HardwareItemResponse
+)
+def index_hardware_for_ai(
+    hardware_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    item = db.query(models.HardwareItem).filter(models.HardwareItem.id == hardware_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Hardware item not found")
+
+    try:
+        description = ai_utils.generate_hardware_description(item)
+        embedding_vector = ai_utils.get_embedding(description)
+        
+        if not embedding_vector:
+            raise HTTPException(status_code=500, detail="Google API returned an empty vector.")
+
+        item.embedding = embedding_vector
+        db.commit()
+        db.refresh(item)
+        
+        return item
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI Indexing failed: {str(e)}")
+
+@app.get(
+    "/api/hardware/ai-search",
+    response_model=List[schemas.HardwareItemBasicResponse]
+)
+def ai_search_hardware(
+    query: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if not query.strip():
+        return []
+
+    query_vector = ai_utils.get_embedding(query)
+    
+    if not query_vector:
+        raise HTTPException(status_code=500, detail="Failed to generate AI search query")
+
+    all_items = db.query(models.HardwareItem).filter(
+        models.HardwareItem.rentable == True,
+        models.HardwareItem.status == models.StatusEnum.AVAILABLE,
+        models.HardwareItem.embedding.is_not(None)
+    ).all()
+
+    scored_items = []
+    for item in all_items:
+        score = ai_utils.cosine_similarity(query_vector, item.embedding)
+        if score >= 0.65: 
+            scored_items.append((score, item))
+        
+    scored_items.sort(key=lambda x: x[0], reverse=True)
+    
+    top_items = [item for _, item in scored_items[:10]]
+
+    return top_items
+
+def background_index_item(hardware_id: int, user_id: str):
+    """Runs in the background. Opens its own DB session."""
+    db = SessionLocal()
+    try:
+        item = db.query(models.HardwareItem).filter(models.HardwareItem.id == hardware_id).first()
+        if not item:
+            return
+
+        admins = db.query(models.User).filter(models.User.role == models.RoleEnum.ADMIN).all()
+
+        for admin in admins:
+            start_notif = models.Notification(
+                user_id=admin.id,
+                message=f"AI Search: Started indexing {item.name}"
+            )
+            db.add(start_notif)
+        db.commit()
+
+        try:
+            description = ai_utils.generate_hardware_description(item)
+            embedding_vector = ai_utils.get_embedding(description)
+
+            if embedding_vector:
+                item.embedding = embedding_vector
+                final_msg = f"AI Search: Successfully indexed {item.name}."
+            else:
+                final_msg = f"AI Search: Failed to index {item.name} (Empty response)."
+        except Exception as e:
+            final_msg = f"AI Search Error: Could not index {item.name}. {str(e)}"
+
+        for admin in admins:
+            end_notif = models.Notification(
+                user_id=admin.id,
+                message=final_msg
+            )
+            db.add(end_notif)
+            
+        db.commit()
+
+    except Exception as e:
+        db.rollback()
+        try:
+            admins = db.query(models.User).filter(models.User.role == models.RoleEnum.ADMIN).all()
+            for admin in admins:
+                notification = models.Notification(
+                    user_id=admin.id,
+                    message=f"AI Search Error: Could not index item {hardware_id}. {str(e)}"
+                )
+                db.add(notification)
+            db.commit()
+        except Exception:
+            pass
+    finally:
+        db.close()
+
+@app.get("/api/notifications", response_model=List[schemas.NotificationResponse])
+def get_my_notifications(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    return db.query(models.Notification).filter(
+        models.Notification.user_id == current_user.id
+    ).order_by(models.Notification.created_at.desc()).all()
+
+@app.post("/api/notifications/{notification_id}/read")
+def mark_notification_read(
+    notification_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    notif = db.query(models.Notification).filter(
+        models.Notification.id == notification_id,
+        models.Notification.user_id == current_user.id
+    ).first()
+    
+    if notif:
+        notif.is_read = True
+        db.commit()
+    
+    return {"status": "success"}
+
+@app.post("/api/notifications/read-all")
+def mark_all_notifications_read(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    db.query(models.Notification).filter(
+        models.Notification.user_id == current_user.id,
+        models.Notification.is_read == False
+    ).update({"is_read": True})
+    db.commit()
+
+    return {"status": "success"}

@@ -10,18 +10,28 @@ import { Plus } from "lucide-react"
 import { getHardwareAdminColumns } from "@/components/columns/hardware-columns"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { HardwareCreationForm } from "@/components/hardware-creation-form"
+import { HardwareDetailsDialog } from "@/components/hardware-details-dialog"
 
 export default function AdminHardwarePage() {
   const [data, setData] = useState<HardwareItem[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  
+  const [selectedItem, setSelectedItem] = useState<HardwareItem | null>(null)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
   async function fetchAllHardware() {
     setLoading(true)
     try {
       const response = await fetch("http://localhost:8000/api/admin/hardware", { credentials: "include" })
       if (!response.ok) throw new Error("Failed to fetch all hardware")
-      setData(await response.json())
+      const items: HardwareItem[] = await response.json()
+      setData(items)
+      
+      if (selectedItem) {
+        const updated = items.find((i) => i.id === selectedItem.id)
+        if (updated) setSelectedItem(updated)
+      }
     } catch (error: any) {
       toast.error(error.message)
     } finally {
@@ -38,7 +48,12 @@ export default function AdminHardwarePage() {
     fetchAllHardware()
   }
 
-  const columns = getHardwareAdminColumns(fetchAllHardware)
+  function handleViewDetails(item: HardwareItem) {
+    setSelectedItem(item)
+    setIsDetailsOpen(true)
+  }
+
+  const columns = getHardwareAdminColumns(fetchAllHardware, handleViewDetails)
 
   const AddItemButton = (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -72,6 +87,13 @@ export default function AdminHardwarePage() {
       ) : (
         <DataTable columns={columns} data={data} actionButton={AddItemButton} />
       )}
+      
+      <HardwareDetailsDialog 
+        item={selectedItem} 
+        open={isDetailsOpen} 
+        onOpenChange={setIsDetailsOpen} 
+        onRefresh={fetchAllHardware}
+      />
     </div>
   )
 }
