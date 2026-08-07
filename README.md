@@ -53,9 +53,13 @@ Ensure you have the following installed on your machine:
    ```env
    SECRET_KEY=your_secret_key
    GEMINI_API_KEY=your_gemini_api_key
+   DATABASE_URL=sqlite:///./hardware_hub.db
+   ENVIRONMENT=development
+   FRONTEND_URL=http://localhost:5173
+   COOKIE_DOMAIN=
    ```
 
-   - Generate a secure `SECRET_KEY` in your terminal:
+   - **Secret Key Generation:** Generate a secure `SECRET_KEY` in your terminal:
 
      **macOS / Linux**
 
@@ -69,7 +73,7 @@ Ensure you have the following installed on your machine:
      python -c "import secrets; print(secrets.token_hex(32))"
      ```
 
-   - Obtain your `GEMINI_API_KEY` from **Google AI Studio** by creating an API key and copying it into your `.env` file.
+   - **Gemini API Key:** Obtain your `GEMINI_API_KEY` from **Google AI Studio** by creating an API key and copying it into your `.env` file.
 
 5. Start the FastAPI development server:
 
@@ -90,13 +94,19 @@ Ensure you have the following installed on your machine:
    cd frontend
    ```
 
-2. Install the JavaScript dependencies:
+2. Create a `.env` file in the `frontend` directory:
+
+   ```env
+   VITE_API_URL=http://localhost:8000
+   ```
+
+3. Install the JavaScript dependencies:
 
    ```bash
    npm install
    ```
 
-3. Start the Vite development server:
+4. Start the Vite development server:
 
    ```bash
    npm run dev
