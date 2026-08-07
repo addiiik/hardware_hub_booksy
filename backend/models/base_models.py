@@ -3,7 +3,7 @@ import enum
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Enum, JSON
 from sqlalchemy.orm import relationship
-from database import Base
+from core.database import Base
 
 class CategoryEnum(str, enum.Enum):
     LAPTOP = "Laptop"
@@ -93,6 +93,7 @@ class Rental(Base):
 
     user = relationship("User", back_populates="rentals")
     item = relationship("HardwareItem", back_populates="rentals")
+
 
 class Repair(Base):
     __tablename__ = "repairs"

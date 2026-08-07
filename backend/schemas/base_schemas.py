@@ -1,6 +1,6 @@
 from typing import List, Optional
-from pydantic import BaseModel, EmailStr, Field, computed_field, field_validator
-from datetime import datetime
+from datetime import datetime, date
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, computed_field, field_validator
 import models
 
 class LoginRequest(BaseModel):
@@ -23,16 +23,14 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UserBasicResponse(BaseModel):
     first_name: str
     last_name: str
     email: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RentalBaseResponse(BaseModel):
     id: int
@@ -41,8 +39,7 @@ class RentalBaseResponse(BaseModel):
     rented_at: datetime
     returned_at: Optional[datetime]
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class NoteCreateRequest(BaseModel):
     content: str = Field(..., min_length=1)
@@ -53,16 +50,14 @@ class NoteResponse(BaseModel):
     created_at: datetime
     author: UserBasicResponse 
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RepairBaseResponse(BaseModel):
     id: int
     repair_start_date: datetime
     repair_end_date: Optional[datetime]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class HardwareItemBasicResponse(BaseModel):
     id: int
@@ -76,8 +71,7 @@ class HardwareItemBasicResponse(BaseModel):
     rentable: bool
     rentals: List[RentalBaseResponse] = [] 
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class HardwareItemResponse(BaseModel):
     id: int
@@ -100,23 +94,28 @@ class HardwareItemResponse(BaseModel):
     def is_ai_indexed(self) -> bool:
         return getattr(self, "embedding", None) is not None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class MyRentalResponse(BaseModel):
     id: int
     rented_at: datetime
     item: HardwareItemResponse
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UserCreateRequest(BaseModel):
     first_name: str = Field(..., min_length=1)
     last_name: str = Field(..., min_length=1)
-    email: str = Field(..., min_length=1)
+    email: EmailStr
     password: str = Field(..., min_length=6)
     role: models.RoleEnum
+
+    @field_validator("email")
+    @classmethod
+    def validate_booksy_domain(cls, value: str) -> str:
+        if not value.endswith("@booksy.com"):
+            raise ValueError("You must use your @booksy.com email address")
+        return value
 
 class HardwareCreateRequest(BaseModel):
     device_name: str = Field(..., min_length=1)
@@ -124,8 +123,15 @@ class HardwareCreateRequest(BaseModel):
     brand: str = Field(..., min_length=1)
     category: models.CategoryEnum
     status: models.StatusEnum = models.StatusEnum.AVAILABLE
-    purchase_date: str | None = None
+    purchase_date: date
     rentable: bool = True
+
+    @field_validator("purchase_date")
+    @classmethod
+    def validate_purchase_date(cls, value: date) -> date:
+        if value > date.today():
+            raise ValueError("Purchase date cannot be in the future")
+        return value
 
 class NotificationResponse(BaseModel):
     id: int
@@ -133,5 +139,4 @@ class NotificationResponse(BaseModel):
     is_read: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
