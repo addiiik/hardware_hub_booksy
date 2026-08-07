@@ -208,7 +208,8 @@ To run the project locally, keep **two terminal windows** open:
 
 # 🔮 Next Steps (24h Roadmap)
 
-1. **UX & Quality of Life (QoL) Improvements:**
+1. **UI, UX & Quality of Life (QoL) Improvements:**
+   * **Responsive layout and adaptive scaling:** Improve the app’s responsiveness across different screen sizes and resolutions, ensuring that layouts scale properly and look polished on larger screens, tablets, and mobile devices.
    * **Edit Capabilities:** Implement dedicated "Edit Hardware" and "Edit User" dialogs.
    * **Batch Actions:** Add table multi-selection to allow bulk status updates, bulk deletions, or bulk AI re-indexing.
    * **User Settings:** Introduce password changing for users and admin password-reset overrides.
