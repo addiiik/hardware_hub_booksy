@@ -1,5 +1,7 @@
 "use client"
 
+import { API_BASE_URL } from "@/lib/config"
+
 import { useEffect, useState } from "react"
 import { DataTable } from "@/components/ui/data-table"
 import { toast } from "sonner"
@@ -16,7 +18,7 @@ export default function HardwareListPage() {
   async function fetchHardware() {
     setLoading(true)
     try {
-      const response = await fetch("http://localhost:8000/api/hardware", {
+      const response = await fetch(`${API_BASE_URL}/api/hardware`, {
         credentials: "include",
       })
       if (!response.ok) throw new Error("Failed to fetch hardware data")
@@ -47,7 +49,7 @@ export default function HardwareListPage() {
 
     setLoading(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/hardware/ai-search?query=${encodeURIComponent(query)}`, {
+      const response = await fetch(`${API_BASE_URL}/api/hardware/ai-search?query=${encodeURIComponent(query)}`, {
         credentials: "include",
       })
       if (!response.ok) throw new Error("AI search failed")

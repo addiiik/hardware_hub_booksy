@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers import auth, hardware, notifications, rentals, users
+from core.config import FRONTEND_URL
 from scripts.seed import seed_database
 from services.background_tasks import startup_index_unindexed_items
 
@@ -19,7 +20,7 @@ app = FastAPI(title="Booksy Hardware Hub", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

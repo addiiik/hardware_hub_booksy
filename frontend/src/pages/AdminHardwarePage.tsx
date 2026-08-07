@@ -1,5 +1,7 @@
 "use client"
 
+import { API_BASE_URL } from "@/lib/config"
+
 import { useEffect, useState } from "react"
 import { DataTable } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
@@ -23,7 +25,7 @@ export default function AdminHardwarePage() {
   async function fetchAllHardware() {
     setLoading(true)
     try {
-      const response = await fetch("http://localhost:8000/api/admin/hardware", { credentials: "include" })
+      const response = await fetch(`${API_BASE_URL}/api/admin/hardware`, { credentials: "include" })
       if (!response.ok) throw new Error("Failed to fetch all hardware")
       const items: HardwareItem[] = await response.json()
       setData(items)

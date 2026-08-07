@@ -1,4 +1,4 @@
-"use client"
+import { API_BASE_URL } from "@/lib/config"
 
 import { useEffect, useState } from "react"
 import { DataTable } from "@/components/ui/data-table"
@@ -13,7 +13,7 @@ export default function MyRentalsPage() {
 
   async function fetchRentals() {
     try {
-      const response = await fetch("http://localhost:8000/api/rentals/me", { 
+      const response = await fetch(`${API_BASE_URL}/api/rentals/me`, { 
         credentials: "include" 
       })
       if (!response.ok) throw new Error("Failed to fetch rentals")

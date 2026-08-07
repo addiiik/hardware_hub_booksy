@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "@/lib/config"
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import LoadingOverlay from "@/components/loading-overlay";
@@ -26,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function checkAuth(signal?: AbortSignal) {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/auth/me", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
         credentials: "include",
         signal,
       });
@@ -51,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function logout() {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/auth/logout", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

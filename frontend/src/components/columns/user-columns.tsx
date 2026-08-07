@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "@/lib/config"
+
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import {
@@ -37,7 +39,7 @@ export const getUserColumns = (onUserDeleted: () => void): ColumnDef<UserItem>[]
 
       async function handleDelete() {
         try {
-          const res = await fetch(`http://localhost:8000/api/admin/users/${user.id}`, {
+          const res = await fetch(`${API_BASE_URL}/api/admin/users/${user.id}`, {
             method: "DELETE",
             credentials: "include"
           })

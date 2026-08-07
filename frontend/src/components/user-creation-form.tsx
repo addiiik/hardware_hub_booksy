@@ -1,5 +1,8 @@
 "use client"
 
+
+import { API_BASE_URL } from "@/lib/config"
+
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
@@ -41,7 +44,7 @@ export function UserCreationForm({ onSuccess }: UserCreationFormProps) {
 
   const onSubmit = async (values: UserCreationValues) => {
     try {
-      const response = await fetch("http://localhost:8000/api/admin/users", {
+      const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

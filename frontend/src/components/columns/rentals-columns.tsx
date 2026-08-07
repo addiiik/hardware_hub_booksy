@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "@/lib/config"
+
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -36,7 +38,7 @@ export const getRentalsColumns = (onItemReturned: () => void): ColumnDef<RentedI
 
       async function handleReturn() {
         try {
-          const res = await fetch(`http://localhost:8000/api/hardware/${rental.item.id}/toggle-rent`, {
+          const res = await fetch(`${API_BASE_URL}/api/hardware/${rental.item.id}/toggle-rent`, {
             method: "POST",
             credentials: "include"
           })

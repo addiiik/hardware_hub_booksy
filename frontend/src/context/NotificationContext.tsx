@@ -1,5 +1,7 @@
 "use client"
 
+import { API_BASE_URL } from "@/lib/config"
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { useAuth } from "@/context/AuthContext"
 
@@ -28,7 +30,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const fetchNotifications = useCallback(async () => {
     if (user?.role !== "admin") return
     try {
-      const res = await fetch("http://localhost:8000/api/notifications", { credentials: "include" })
+      const res = await fetch(`${API_BASE_URL}/api/notifications`, { credentials: "include" })
       if (res.ok) {
         const data: AppNotification[] = await res.json()
         setNotifications(data)
@@ -46,7 +48,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const markAsRead = async (id: number) => {
     try {
-      await fetch(`http://localhost:8000/api/notifications/${id}/read`, {
+      await fetch(`${API_BASE_URL}/api/notifications/${id}/read`, {
         method: "POST",
         credentials: "include"
       })
@@ -60,7 +62,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const markAllAsRead = async () => {
     try {
-      await fetch("http://localhost:8000/api/notifications/read-all", {
+      await fetch(`${API_BASE_URL}/api/notifications/read-all`, {
         method: "POST",
         credentials: "include"
       })

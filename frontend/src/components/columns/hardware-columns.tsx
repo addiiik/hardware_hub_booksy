@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "@/lib/config"
+
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -35,7 +37,7 @@ const ActionCell = ({ row, onRefresh }: { row: Row<HardwareItem>, onRefresh: () 
 
   async function handleToggleRent() {
     try {
-      const res = await fetch(`http://localhost:8000/api/hardware/${item.id}/toggle-rent`, {
+      const res = await fetch(`${API_BASE_URL}/api/hardware/${item.id}/toggle-rent`, {
         method: "POST",
         credentials: "include"
       })
@@ -249,7 +251,7 @@ export const getHardwareAdminColumns = (
 
       async function handleDelete() {
         try {
-          const res = await fetch(`http://localhost:8000/api/admin/hardware/${item.id}`, {
+          const res = await fetch(`${API_BASE_URL}/api/admin/hardware/${item.id}`, {
             method: "DELETE",
             credentials: "include"
           })
@@ -263,7 +265,7 @@ export const getHardwareAdminColumns = (
 
       async function handleToggleRepair() {
         try {
-          const res = await fetch(`http://localhost:8000/api/admin/hardware/${item.id}/toggle-repair`, {
+          const res = await fetch(`${API_BASE_URL}/api/admin/hardware/${item.id}/toggle-repair`, {
             method: "POST",
             credentials: "include"
           })
@@ -304,7 +306,7 @@ export const getHardwareAdminColumns = (
                 <DropdownMenuItem
                   onClick={async () => {
                     try {
-                      const res = await fetch(`http://localhost:8000/api/admin/hardware/${item.id}/index-ai`, {
+                      const res = await fetch(`${API_BASE_URL}/api/admin/hardware/${item.id}/index-ai`, {
                         method: "POST",
                         credentials: "include"
                       })

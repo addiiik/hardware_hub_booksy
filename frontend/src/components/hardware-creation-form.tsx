@@ -1,5 +1,6 @@
 "use client"
 
+import { API_BASE_URL } from "@/lib/config"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
@@ -53,7 +54,7 @@ export function HardwareCreationForm({ onSuccess }: HardwareCreationFormProps) {
 
   const onSubmit = async (values: HardwareCreationValues) => {
     try {
-      const response = await fetch("http://localhost:8000/api/admin/hardware", {
+      const response = await fetch(`${API_BASE_URL}/api/admin/hardware`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

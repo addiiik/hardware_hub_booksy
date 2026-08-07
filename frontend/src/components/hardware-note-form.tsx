@@ -1,5 +1,6 @@
 "use client"
 
+import { API_BASE_URL } from "@/lib/config"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
@@ -33,7 +34,7 @@ export function HardwareNoteForm({ itemId, onSuccess }: HardwareNoteFormProps) {
 
   const onSubmit = async (values: NoteCreationValues) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/hardware/${itemId}/notes`, {
+      const response = await fetch(`${API_BASE_URL}/api/hardware/${itemId}/notes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

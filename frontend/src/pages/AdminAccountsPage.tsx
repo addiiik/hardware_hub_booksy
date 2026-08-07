@@ -1,5 +1,7 @@
 "use client"
 
+import { API_BASE_URL } from "@/lib/config"
+
 import { useEffect, useState } from "react"
 import { DataTable } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
@@ -26,7 +28,7 @@ export default function AdminAccountsPage() {
   async function fetchUsers() {
     setLoading(true)
     try {
-      const response = await fetch("http://localhost:8000/api/admin/users", { credentials: "include" })
+      const response = await fetch(`${API_BASE_URL}/api/admin/users`, { credentials: "include" })
       if (!response.ok) throw new Error("Failed to fetch users")
       setData(await response.json())
     } catch (error: any) {

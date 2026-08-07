@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "@/lib/config"
+
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
@@ -43,7 +45,7 @@ export function LoginForm({
   const onSubmit = async (values: LoginFormValues) => {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/auth/login",
+        `${API_BASE_URL}/api/auth/login`,
         {
           method: "POST",
           headers: {
