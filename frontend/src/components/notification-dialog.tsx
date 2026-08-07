@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { AppNotification } from "@/pages/AdminNotificationPage"
+import { AppNotification } from "@/context/NotificationContext"
 import { CheckCircle2, XCircle } from "lucide-react"
 
 interface NotificationDialogProps {
@@ -17,8 +17,8 @@ interface NotificationDialogProps {
 export function NotificationDialog({ notification, open, onOpenChange }: NotificationDialogProps) {
   if (!notification) return null
 
-  const isSuccess = notification.message.includes("✅") || notification.message.includes("Successfully")
-  const isError = notification.message.includes("❌") || notification.message.includes("Error") || notification.message.includes("Failed")
+  const isSuccess = notification.title.includes("✅") || notification.title.includes("Successfully")
+  const isError = notification.title.includes("❌") || notification.title.includes("Error") || notification.title.includes("Failed")
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -26,7 +26,7 @@ export function NotificationDialog({ notification, open, onOpenChange }: Notific
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isSuccess ? <CheckCircle2 className="h-5 w-5 text-green-500" /> : isError ? <XCircle className="h-5 w-5 text-destructive" /> : null}
-            Notification Details
+            {notification.title.replace(/[✅❌]/g, '').trim()}
           </DialogTitle>
           <DialogDescription>
             {new Date(notification.created_at).toLocaleString()}
@@ -34,7 +34,7 @@ export function NotificationDialog({ notification, open, onOpenChange }: Notific
         </DialogHeader>
         
         <div className="flex-1 overflow-y-auto p-4 bg-muted/30 rounded-md border mt-2 text-sm whitespace-pre-wrap wrap-break-word">
-          {notification.message.replace(/[✅❌]/g, '').trim()}
+          {notification.content}
         </div>
       </DialogContent>
     </Dialog>

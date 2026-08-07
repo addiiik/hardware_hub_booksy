@@ -135,7 +135,8 @@ class HardwareCreateRequest(BaseModel):
 
 class NotificationResponse(BaseModel):
     id: int
-    message: str
+    title: str
+    content: str
     is_read: bool
     created_at: datetime
 

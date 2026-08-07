@@ -83,8 +83,8 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between"> 
-        <div className="flex items-center gap-2 max-w-sm w-full">
+      <div className="flex items-center justify-between gap-10"> 
+        <div className="flex items-center gap-2 w-full">
           <Input
             placeholder={isAiMode ? "Ask AI to find gear..." : "Search all items..."}
             value={isAiMode ? aiSearchText : (globalFilter ?? "")}

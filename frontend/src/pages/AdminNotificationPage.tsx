@@ -65,16 +65,16 @@ export default function AdminNotificationPage() {
                   className="flex-1 flex gap-3 items-center p-4 text-left"
                   onClick={() => handleOpenDialog(notif)}
                 >
-                  {notif.message.includes("✅") || notif.message.includes("Successfully") ? (
+                  {notif.title.includes("✅") || notif.title.includes("Successfully") || notif.title.includes("Started") ? (
                     <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-                  ) : notif.message.includes("❌") || notif.message.includes("Error") || notif.message.includes("Failed") ? (
+                  ) : notif.title.includes("❌") || notif.title.includes("Error") || notif.title.includes("Failed") ? (
                     <XCircle className="h-5 w-5 text-destructive shrink-0" />
                   ) : (
                     <div className="h-5 w-5 shrink-0" />
                   )}
                   <div className="flex-1 flex flex-col gap-1 min-w-0">
-                    <p className="text-sm truncate">
-                      {notif.message.replace(/[✅❌]/g, '').trim()}
+                    <p className="text-sm font-semibold truncate">
+                      {notif.title.replace(/[✅❌]/g, '').trim()}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(notif.created_at).toLocaleString()}

@@ -4,7 +4,6 @@ from models.base_models import HardwareItem, User, Notification, RoleEnum
 from services.ai_service import generate_hardware_description, get_embedding
 
 def startup_index_unindexed_items():
-    """Runs on server startup in a background thread to index missing items."""
     db = SessionLocal()
     try:
         unindexed_items = db.query(HardwareItem).filter(HardwareItem.embedding.is_(None)).all()
@@ -15,6 +14,9 @@ def startup_index_unindexed_items():
         admins = db.query(User).filter(User.role == RoleEnum.ADMIN).all()
 
         for item in unindexed_items:
+            if not item.rentable:
+                continue
+
             pattern = r"(?i)\b(test|demo|dummy|placeholder|fake)"
             combined_text = f"{item.name} {item.brand} {item.serial_number}"
             if re.search(pattern, combined_text):
@@ -23,7 +25,8 @@ def startup_index_unindexed_items():
             for admin in admins:
                 start_notif = Notification(
                     user_id=admin.id,
-                    message=f"AI Search: Started indexing {item.name}"
+                    title=f"AI Search: Started indexing {item.name}",
+                    content=f"AI Search background process has started indexing hardware item '{item.name}'.\nHardware ID: {item.id}\nSerial Number: {item.serial_number}"
                 )
                 db.add(start_notif)
             db.commit()
@@ -34,16 +37,20 @@ def startup_index_unindexed_items():
 
                 if embedding_vector:
                     item.embedding = embedding_vector
-                    final_msg = f"AI Search: Successfully indexed {item.name}."
+                    final_title = f"AI Search: Successfully indexed {item.name}."
+                    final_content = f"Successfully generated descriptions and vector embeddings for '{item.name}'.\nHardware ID: {item.id}\nSerial Number: {item.serial_number}"
                 else:
-                    final_msg = f"AI Search: Failed to index {item.name} (Empty response)."
+                    final_title = f"AI Search: Failed to index {item.name}"
+                    final_content = f"Failed to index {item.name} because an empty response was returned.\nHardware ID: {item.id}\nSerial Number: {item.serial_number}"
             except Exception as e:
-                final_msg = f"AI Search Error: Could not index {item.name}. {str(e)}"
+                final_title = f"AI Search Error: Could not index {item.name}."
+                final_content = f"An error occurred while indexing '{item.name}': {str(e)}\nHardware ID: {item.id}\nSerial Number: {item.serial_number}"
 
             for admin in admins:
                 end_notif = Notification(
                     user_id=admin.id,
-                    message=final_msg
+                    title=final_title,
+                    content=final_content
                 )
                 db.add(end_notif)
             
@@ -55,11 +62,13 @@ def startup_index_unindexed_items():
         db.close()
 
 def background_index_item(hardware_id: int, user_id: str):
-    """Runs in background tasks upon single-item creation. Opens its own DB session."""
     db = SessionLocal()
     try:
         item = db.query(HardwareItem).filter(HardwareItem.id == hardware_id).first()
         if not item:
+            return
+
+        if not item.rentable:
             return
 
         pattern = r"(?i)\b(test|demo|dummy|placeholder|fake)"
@@ -72,7 +81,8 @@ def background_index_item(hardware_id: int, user_id: str):
         for admin in admins:
             start_notif = Notification(
                 user_id=admin.id,
-                message=f"AI Search: Started indexing {item.name}"
+                title=f"AI Search: Started indexing {item.name}",
+                content=f"AI Search background process has started indexing hardware item '{item.name}'.\nHardware ID: {item.id}\nSerial Number: {item.serial_number}"
             )
             db.add(start_notif)
         db.commit()
@@ -83,16 +93,20 @@ def background_index_item(hardware_id: int, user_id: str):
 
             if embedding_vector:
                 item.embedding = embedding_vector
-                final_msg = f"AI Search: Successfully indexed {item.name}."
+                final_title = f"AI Search: Successfully indexed {item.name}."
+                final_content = f"Successfully generated descriptions and vector embeddings for '{item.name}'.\nHardware ID: {item.id}\nSerial Number: {item.serial_number}"
             else:
-                final_msg = f"AI Search: Failed to index {item.name} (Empty response)."
+                final_title = f"AI Search: Failed to index {item.name}"
+                final_content = f"Failed to index {item.name} because an empty response was returned.\nHardware ID: {item.id}\nSerial Number: {item.serial_number}"
         except Exception as e:
-            final_msg = f"AI Search Error: Could not index {item.name}. {str(e)}"
+            final_title = f"AI Search Error: Could not index {item.name}."
+            final_content = f"An error occurred while indexing '{item.name}': {str(e)}\nHardware ID: {item.id}\nSerial Number: {item.serial_number}"
 
         for admin in admins:
             end_notif = Notification(
                 user_id=admin.id,
-                message=final_msg
+                title=final_title,
+                content=final_content
             )
             db.add(end_notif)
             
@@ -105,7 +119,8 @@ def background_index_item(hardware_id: int, user_id: str):
             for admin in admins:
                 notification = Notification(
                     user_id=admin.id,
-                    message=f"AI Search Error: Could not index item {hardware_id}. {str(e)}"
+                    title=f"AI Search Error: Could not index item {hardware_id}.",
+                    content=f"An unexpected error occurred during background indexing: {str(e)}\nHardware ID: {hardware_id}"
                 )
                 db.add(notification)
             db.commit()

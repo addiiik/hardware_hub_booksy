@@ -8,6 +8,7 @@ import schemas
 from core.database import get_db
 from api.deps import get_current_user
 from services import ai_service
+from services import query_parser
 from services.background_tasks import background_index_item
 
 router = APIRouter(tags=["hardware"])
@@ -219,6 +220,12 @@ def index_hardware_for_ai(
     if not item:
         raise HTTPException(status_code=404, detail="Hardware item not found")
 
+    if not item.rentable:
+        raise HTTPException(
+            status_code=400,
+            detail="Non-rentable items cannot be indexed"
+        )
+
     pattern = r"(?i)\b(test|demo|dummy|placeholder|fake)"
     combined_text = f"{item.name} {item.brand} {item.serial_number}"
     
@@ -252,25 +259,49 @@ def ai_search_hardware(
     if not query.strip():
         return []
 
-    query_vector = ai_service.get_embedding(query)
-    
+    parsed = query_parser.parse_search_query(query)
+
+    base_query = db.query(models.HardwareItem).filter(
+        models.HardwareItem.rentable == True,
+        models.HardwareItem.status == models.StatusEnum.AVAILABLE,
+    )
+
+    if parsed["category"]:
+        base_query = base_query.filter(models.HardwareItem.category == parsed["category"])
+    if parsed["brand"]:
+        base_query = base_query.filter(models.HardwareItem.brand.ilike(parsed["brand"]))
+    if parsed["purchased_after"]:
+        base_query = base_query.filter(models.HardwareItem.purchase_date >= parsed["purchased_after"])
+    if parsed["purchased_before"]:
+        base_query = base_query.filter(models.HardwareItem.purchase_date <= parsed["purchased_before"])
+
+    semantic_query = (parsed["semantic_query"] or "").strip()
+
+    if not semantic_query:
+        return (
+            base_query.order_by(models.HardwareItem.purchase_date.desc())
+            .limit(10)
+            .all()
+        )
+
+    candidates = base_query.filter(models.HardwareItem.embedding.is_not(None)).all()
+
+    if not candidates:
+        return []
+
+    query_vector = ai_service.get_embedding(semantic_query)
+
     if not query_vector:
         raise HTTPException(status_code=500, detail="Failed to generate AI search query")
 
-    all_items = db.query(models.HardwareItem).filter(
-        models.HardwareItem.rentable == True,
-        models.HardwareItem.status == models.StatusEnum.AVAILABLE,
-        models.HardwareItem.embedding.is_not(None)
-    ).all()
-
     scored_items = []
-    for item in all_items:
+    for item in candidates:
         score = ai_service.cosine_similarity(query_vector, item.embedding)
-        if score >= 0.65: 
+        if score >= 0.65:
             scored_items.append((score, item))
-        
+
     scored_items.sort(key=lambda x: x[0], reverse=True)
-    
+
     top_items = [item for _, item in scored_items[:10]]
 
     return top_items

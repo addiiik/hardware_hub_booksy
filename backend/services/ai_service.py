@@ -18,12 +18,20 @@ def generate_hardware_description(item) -> str:
     desc = f"Device: {name}. Brand: {brand}. Category: {category}."
 
     if cat_upper in ["SMARTPHONE", "TABLET"]:
-        os_type = "iOS/iPadOS" if str(brand).lower() == "apple" else "Android"
+        is_apple = str(brand).lower() == "apple"
+        os_type = "iOS/iPadOS" if is_apple else "Android"
         desc += f" Ecosystem: {os_type}. Use case: Mobile app testing, responsive web design, mobile QA."
-    
+        if is_apple:
+            desc += " Suitable for testing iOS/iPadOS apps on real Apple hardware."
+        else:
+            desc += " Suitable for testing Android apps on real hardware."
+
     elif cat_upper in ["LAPTOP", "OTHER"]:
-        os_type = "macOS" if str(brand).lower() == "apple" else "Windows/Linux/PC"
+        is_apple = str(brand).lower() == "apple"
+        os_type = "macOS" if is_apple else "Windows/Linux/PC"
         desc += f" Ecosystem: {os_type}. Use case: Software development, heavy processing, general computing."
+        if is_apple:
+            desc += " Can run Xcode to build, simulate, and test iOS/iPadOS apps."
     
     elif cat_upper == "AUDIO":
         desc += " Use case: Audio recording, video conferencing, meetings, sound mixing, media consumption."
@@ -40,7 +48,6 @@ def generate_hardware_description(item) -> str:
     return desc
 
 def get_embedding(text: str) -> list[float]:
-    """Calls Google's API to get the vector embedding for a string."""
     try:
         result = client.models.embed_content(
             model="gemini-embedding-2",
@@ -55,7 +62,6 @@ def get_embedding(text: str) -> list[float]:
         return []
 
 def cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
-    """Calculates the similarity score between two vectors."""
     a = np.array(vec_a)
     b = np.array(vec_b)
     if a.size == 0 or b.size == 0:
