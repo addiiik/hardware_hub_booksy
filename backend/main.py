@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime, timezone
 import threading
+import re
 
 import ai_utils
 import models
@@ -29,6 +30,11 @@ def startup_index_unindexed_items():
         admins = db.query(models.User).filter(models.User.role == models.RoleEnum.ADMIN).all()
 
         for item in unindexed_items:
+            pattern = r"(?i)\b(test|demo|dummy|placeholder|fake)"
+            combined_text = f"{item.name} {item.brand} {item.serial_number}"
+            if re.search(pattern, combined_text):
+                continue
+
             for admin in admins:
                 start_notif = models.Notification(
                     user_id=admin.id,
@@ -503,6 +509,15 @@ def index_hardware_for_ai(
     if not item:
         raise HTTPException(status_code=404, detail="Hardware item not found")
 
+    pattern = r"(?i)\b(test|demo|dummy|placeholder|fake)"
+    combined_text = f"{item.name} {item.brand} {item.serial_number}"
+    
+    if re.search(pattern, combined_text):
+        raise HTTPException(
+            status_code=400, 
+            detail="Placeholder items cannot be indexed"
+        )
+
     try:
         description = ai_utils.generate_hardware_description(item)
         embedding_vector = ai_utils.get_embedding(description)
@@ -559,6 +574,11 @@ def background_index_item(hardware_id: int, user_id: str):
     try:
         item = db.query(models.HardwareItem).filter(models.HardwareItem.id == hardware_id).first()
         if not item:
+            return
+
+        pattern = r"(?i)\b(test|demo|dummy|placeholder|fake)"
+        combined_text = f"{item.name} {item.brand} {item.serial_number}"
+        if re.search(pattern, combined_text):
             return
 
         admins = db.query(models.User).filter(models.User.role == models.RoleEnum.ADMIN).all()

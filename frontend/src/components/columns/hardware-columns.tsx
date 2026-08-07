@@ -308,7 +308,10 @@ export const getHardwareAdminColumns = (
                         method: "POST",
                         credentials: "include"
                       })
-                      if (!res.ok) throw new Error("Failed to index item")
+                      if (!res.ok) {
+                        const errorData = await res.json()
+                        throw new Error(errorData.detail || "Failed to index item")
+                      }
                       toast.success(`${item.name} indexed successfully!`)
                       onItemDeleted()
                     } catch (error: any) {
