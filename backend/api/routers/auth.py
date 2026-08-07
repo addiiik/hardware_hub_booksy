@@ -4,6 +4,7 @@ import models
 import schemas
 from core.database import get_db
 from core.security import verify_password, create_access_token
+from core.config import COOKIE_DOMAIN, COOKIE_SAMESITE, COOKIE_SECURE
 from api.deps import get_current_user
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -42,8 +43,9 @@ def login(
         key="access_token",
         value=f"Bearer {token}",
         httponly=True,
-        secure=True,
-        samesite="none",
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        domain=COOKIE_DOMAIN,
         max_age=86400
     )
 
@@ -55,5 +57,11 @@ def me(user=Depends(get_current_user)):
 
 @router.post("/logout")
 def logout(response: Response):
-    response.delete_cookie("access_token")
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        domain=COOKIE_DOMAIN
+    )
     return {"message": "Logged out"}
