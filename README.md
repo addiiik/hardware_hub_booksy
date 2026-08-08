@@ -138,15 +138,6 @@ To run the project locally, keep **two terminal windows** open:
   npm run dev
   ```
 
-# Demo
-
-A live demo is available at:
-
-https://booksy.adriankukla.com
-
-Demo credentials are provided directly in the assessment submission email.
-The application includes separate Admin and User roles for testing the different functionality.
-
 ---
 
 # Implementation Progress & Architecture
