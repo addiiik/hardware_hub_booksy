@@ -196,6 +196,10 @@ To run the project locally, keep **two terminal windows** open:
   * **What was done:** Rather than writing custom UI components from scratch, the interface was constructed using `shadcn/ui` primitives and component blocks. For example, the login view was adapted from a pre-made `shadcn` block and wired up with `react-hook-form` and custom styling to fit the assessment layout.
   * **The "Why":** Building fully accessible, robust, and responsive UI components takes significant time. Leveraging `shadcn/ui` allowed maximum focus on business logic, AI integrations, data integrity, and API stability without sacrificing UI quality.
   * **The "Future":** Given extra time, the components could be further tweaked or converted into a dedicated proprietary design system for complete visual originality.
+* **Post-Deployment Fixes & Unverified Regression Testing:**
+  - **What was done:** Applied a few urgent bug fixes directly post-deployment, primarily adjusting cookie configuration/handling to resolve deployment-specific environment issues.
+  - **The Caveat:** Because these changes occurred right after deployment, the entire application wasn't subjected to a full manual re-testing pass across every single flow ("didn't re-click through everything").
+  - **The Risk:** Theoretically, changing only cookie handling shouldn't break unrelated UI features or business logic, but without a complete post-fix QA pass, unforeseen edge cases might exist.
 
 ---
 
