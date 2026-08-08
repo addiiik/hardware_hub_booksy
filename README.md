@@ -140,6 +140,26 @@ To run the project locally, keep **two terminal windows** open:
 
 ---
 
+## Running tests
+
+From the project root, go to the backend, activate the virtual environment, and run pytest.
+
+**macOS / Linux**
+```bash
+cd backend
+source venv/bin/activate
+pytest
+```
+
+**Windows (Command Prompt / PowerShell)**
+```bash
+cd backend
+.\venv\Scripts\activate
+pytest
+```
+
+---
+
 # Implementation Progress & Architecture
 
 ## 1. The Management Engine (Admin & Users) — ✅ Fully Implemented
